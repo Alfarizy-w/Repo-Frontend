@@ -1,0 +1,1133 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TopZoneID - Game Top-Up Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007BFF',
+                        'primary-light': '#E3F2FD',
+                        'gray-light': '#F8F9FA',
+                        'gray-medium': '#6C757D'
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'roboto': ['Roboto', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 8px rgba(0, 123, 255, 0.1)',
+                        'hover': '0 4px 16px rgba(0, 123, 255, 0.15)'
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .smooth-transition { transition: all 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.02); }
+        .floating-whatsapp {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007BFF;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .mobile-menu { transform: translateX(-100%); }
+        .mobile-menu.active { transform: translateX(0); }
+    </style>
+    <script>
+document.addEventListener("DOMContentLoaded", function(){
+    const topupBtn = document.getElementById("topupBtn");
+    if(topupBtn){
+        topupBtn.addEventListener("click", function(){
+            const game = document.querySelector("[data-bind='selectedGame']")?.value || "";
+            const userId = document.querySelector("[data-bind='userId']")?.value || "";
+            const serverId = document.querySelector("[data-bind='serverId']")?.value || "";
+            const amountElement = document.querySelector("[data-event='click:selectOrderPackage'].border-primary");
+            const amount = amountElement ? amountElement.innerText.trim() : "";
+
+            if(!game || !userId || !serverId || !amount){
+                alert("Silakan isi semua data dan pilih paket terlebih dahulu.");
+                return;
+            }
+
+            const params = new URLSearchParams({
+                game: game,
+                userId: userId,
+                serverId: serverId,
+                amount: amount
+            });
+
+            window.location.href = "order.html?" + params.toString();
+        });
+    }
+});
+</script>
+
+</head>
+<body class="font-roboto bg-gray-50">
+    <!-- @COMPONENT: Header [navigation, mobile menu] -->
+    <header class="bg-white shadow-soft sticky top-0 z-50">
+        <nav class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-gamepad text-white text-lg"></i>
+                    </div>
+                    <span class="font-poppins font-bold text-xl text-gray-800">TopZoneID</span>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="#home" class="text-gray-700 hover:text-primary smooth-transition">Home</a>
+                    <a href="#games" class="text-gray-700 hover:text-primary smooth-transition">Games</a>
+                    <a href="#about" class="text-gray-700 hover:text-primary smooth-transition">About</a>
+                    <a href="#faq" class="text-gray-700 hover:text-primary smooth-transition">FAQ</a>
+                    <a href="#contact" class="text-gray-700 hover:text-primary smooth-transition">Contact</a>
+                </div>
+
+                <!-- Order Status Button -->
+                <div class="hidden lg:flex items-center space-x-4">
+                    <button data-event="click:checkOrderStatus" class="bg-primary-light text-primary px-4 py-2 rounded-lg smooth-transition hover:bg-primary hover:text-white">
+                        <i class="fas fa-search mr-2"></i>Check Order
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="lg:hidden text-gray-700" data-event="click:toggleMobileMenu">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu fixed inset-0 bg-white z-40 lg:hidden smooth-transition">
+            <div class="p-4">
+                <div class="flex justify-between items-center mb-8">
+                    <span class="font-poppins font-bold text-xl">TopZoneID</span>
+                    <button data-event="click:closeMobileMenu">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <nav class="space-y-4">
+                    <a href="#home" class="block py-2 text-lg">Home</a>
+                    <a href="#games" class="block py-2 text-lg">Games</a>
+                    <a href="#about" class="block py-2 text-lg">About</a>
+                    <a href="#faq" class="block py-2 text-lg">FAQ</a>
+                    <a href="#contact" class="block py-2 text-lg">Contact</a>
+                    <button class="w-full bg-primary text-white py-3 rounded-lg mt-4">Check Order Status</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <!-- @COMPONENT: Hero [banner, quick top-up form] -->
+    <section id="home" class="bg-gradient-to-r from-primary to-blue-600 text-white py-16 lg:py-24">
+        <div class="container mx-auto px-4">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h1 class="font-poppins font-bold text-4xl lg:text-6xl mb-6">
+                        Top-Up Games <span class="text-yellow-300">Instantly</span>
+                    </h1>
+                    <p class="text-xl lg:text-2xl mb-8 opacity-90">
+                        Fast, secure, and reliable game credit top-up for all your favorite games
+                    </p>
+                    <div class="flex flex-wrap gap-4 mb-8">
+                        <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">✓ Instant Delivery</span>
+                        <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">✓ 24/7 Support</span>
+                        <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">✓ Best Prices</span>
+                    </div>
+                </div>
+
+                <!-- Quick Top-Up Form -->
+                <div class="bg-white rounded-2xl p-6 lg:p-8 shadow-hover">
+                    <h3 class="font-poppins font-semibold text-2xl text-gray-800 mb-6">Quick Top-Up</h3>
+                    <form data-implementation="Should handle form submission and validation">
+                        <!-- @STATE: selectedGame:string = '', userId:string = '', amount:string = '' -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Select Game</label>
+                                <select data-bind="selectedGame" class="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-800">
+                                    <option data-mock="true">Choose your game...</option>
+                                    <option data-mock="true">Mobile Legends</option>
+                                    <option data-mock="true">Free Fire</option>
+                                    <option data-mock="true">PUBG Mobile</option>
+                                    <option data-mock="true">Genshin Impact</option>
+                                </select>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">User ID</label>
+                                    <input data-bind="userId" type="text" placeholder="Enter User ID" class="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-800">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Server ID</label>
+                                    <input data-bind="serverId" type="text" placeholder="Server ID" class="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-gray-800">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Amount</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                   
+                                    <button type="button" class="p-3 border border-gray-200 rounded-lg hover:border-primary hover:bg-primary-light smooth-transition text-gray-800"data-event="click:selectOrderPackage"> 86 💎</button> 
+                                    <button type="button" class="p-3 border border-gray-200 rounded-lg hover:border-primary hover:bg-primary-light smooth-transition text-gray-800"data-event="click:selectOrderPackage">172 💎</button>
+                                    <button type="button" class="p-3 border border-gray-200 rounded-lg hover:border-primary hover:bg-primary-light smooth-transition text-gray-800"data-event="click:selectOrderPackage">257 💎</button>
+                                
+                            </div>
+
+                            <button id="topupBtn" type="button" data-event="click:submitQuickTopup" class="w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-600 smooth-transition">
+    Top-Up Now
+</button>
+
+ 
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Hero -->
+
+    <!-- @COMPONENT: GameCatalog [game selection grid] -->
+    <section id="games" class="py-16 lg:py-24">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="font-poppins font-bold text-3xl lg:text-4xl text-gray-800 mb-4">Popular Games</h2>
+                <p class="text-gray-600 text-lg">Choose from our wide selection of popular games</p>
+            </div>
+
+            <!-- @MAP: games.map(game => ( -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="game-card bg-white rounded-xl shadow-soft hover:shadow-hover smooth-transition hover-scale cursor-pointer" data-event="click:selectGame">
+                    <!-- Modern mobile MOBA game with colorful characters and fantasy theme -->
+                    <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240" alt="Mobile Legends" class="w-full h-32 object-cover rounded-t-xl">
+                    <div class="p-4">
+                        <h3 class="font-poppins font-semibold text-lg text-gray-800 mb-1" data-mock="true">Mobile Legends</h3>
+                        <p class="text-gray-600 text-sm" data-mock="true">Diamonds</p>
+                        <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full mt-2" data-mock="true">Most Popular</span>
+                    </div>
+                </div>
+
+                <div class="game-card bg-white rounded-xl shadow-soft hover:shadow-hover smooth-transition hover-scale cursor-pointer" data-event="click:selectGame">
+                    <!-- Battle royale game with intense action and survival theme -->
+                    <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240" alt="Free Fire" class="w-full h-32 object-cover rounded-t-xl">
+                    <div class="p-4">
+                        <h3 class="font-poppins font-semibold text-lg text-gray-800 mb-1" data-mock="true">Free Fire</h3>
+                        <p class="text-gray-600 text-sm" data-mock="true">Diamonds</p>
+                    </div>
+                </div>
+
+                <div class="game-card bg-white rounded-xl shadow-soft hover:shadow-hover smooth-transition hover-scale cursor-pointer" data-event="click:selectGame">
+                    <!-- Mobile battle royale game with military and tactical themes -->
+                    <img src="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240" alt="PUBG Mobile" class="w-full h-32 object-cover rounded-t-xl">
+                    <div class="p-4">
+                        <h3 class="font-poppins font-semibold text-lg text-gray-800 mb-1" data-mock="true">PUBG Mobile</h3>
+                        <p class="text-gray-600 text-sm" data-mock="true">UC</p>
+                    </div>
+                </div>
+
+                <div class="game-card bg-white rounded-xl shadow-soft hover:shadow-hover smooth-transition hover-scale cursor-pointer" data-event="click:selectGame">
+                    <!-- Fantasy anime-style RPG game with magical elements and adventure -->
+                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240" alt="Genshin Impact" class="w-full h-32 object-cover rounded-t-xl">
+                    <div class="p-4">
+                        <h3 class="font-poppins font-semibold text-lg text-gray-800 mb-1" data-mock="true">Genshin Impact</h3>
+                        <p class="text-gray-600 text-sm" data-mock="true">Genesis Crystals</p>
+                    </div>
+                </div>
+
+                <div class="game-card bg-white rounded-xl shadow-soft hover:shadow-hover smooth-transition hover-scale cursor-pointer" data-event="click:selectGame">
+                    <!-- Colorful match-3 puzzle game with candy and sweet themes -->
+                    <img src="https://pixabay.com/get/gd57b4c3ace8304d0730644e9a6c4c55b8377ffc575791d00d311994e18deca95ff86f6dea0554d0c6911e6961cf3116749a84ec8d630ffea12cc3c7629eaed9d_1280.jpg" alt="Candy Crush" class="w-full h-32 object-cover rounded-t-xl">
+                    <div class="p-4">
+                        <h3 class="font-poppins font-semibold text-lg text-gray-800 mb-1" data-mock="true">Candy Crush</h3>
+                        <p class="text-gray-600 text-sm" data-mock="true">Gold Bars</p>
+                    </div>
+                </div>
+
+                <div class="game-card bg-white rounded-xl shadow-soft hover:shadow-hover smooth-transition hover-scale cursor-pointer" data-event="click:selectGame">
+                    <!-- Clash royale style strategy game with cards and towers -->
+                    <img src="https://pixabay.com/get/gb541da088316a394932a0a5e33b2d18ce8c57e5fa9433b077ecab4b0b8a19e02b10fa527c4dcb63b71d599109ce509de086dbbb0545cef6217c65a7e1d664a28_1280.jpg" alt="Clash Royale" class="w-full h-32 object-cover rounded-t-xl">
+                    <div class="p-4">
+                        <h3 class="font-poppins font-semibold text-lg text-gray-800 mb-1" data-mock="true">Clash Royale</h3>
+                        <p class="text-gray-600 text-sm" data-mock="true">Gems</p>
+                    </div>
+                </div>
+
+                <div class="game-card bg-white rounded-xl shadow-soft hover:shadow-hover smooth-transition hover-scale cursor-pointer" data-event="click:selectGame">
+                    <!-- Among Us style social deduction game with colorful characters -->
+                    <img src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240" alt="Among Us" class="w-full h-32 object-cover rounded-t-xl">
+                    <div class="p-4">
+                        <h3 class="font-poppins font-semibold text-lg text-gray-800 mb-1" data-mock="true">Among Us</h3>
+                        <p class="text-gray-600 text-sm" data-mock="true">Cosmetics</p>
+                    </div>
+                </div>
+
+                <div class="game-card bg-white rounded-xl shadow-soft hover:shadow-hover smooth-transition hover-scale cursor-pointer" data-event="click:selectGame">
+                    <!-- Racing game with high-speed cars and urban environments -->
+                    <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=240" alt="Asphalt 9" class="w-full h-32 object-cover rounded-t-xl">
+                    <div class="p-4">
+                        <h3 class="font-poppins font-semibold text-lg text-gray-800 mb-1" data-mock="true">Asphalt 9</h3>
+                        <p class="text-gray-600 text-sm" data-mock="true">Tokens</p>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_MAP )) -->
+        </div>
+    </section>
+    <!-- @END_COMPONENT: GameCatalog -->
+
+    <!-- @COMPONENT: ProductDetail [Mobile Legends Diamonds] -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div>
+                        <!-- Mobile Legends game artwork with diamond currency and characters -->
+                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400" alt="Mobile Legends Diamond Top-Up" class="w-full rounded-xl shadow-soft">
+                    </div>
+                    
+                    <div>
+                        <h2 class="font-poppins font-bold text-3xl text-gray-800 mb-4" data-mock="true">Mobile Legends Diamonds</h2>
+                        <p class="text-gray-600 mb-6" data-mock="true">Get instant diamonds for Mobile Legends: Bang Bang. Purchase heroes, skins, and other premium content.</p>
+                        
+                        <!-- Diamond Packages -->
+                        <div class="space-y-3 mb-8">
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-primary smooth-transition cursor-pointer" data-event="click:selectPackage">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="font-semibold text-lg" data-mock="true">86 Diamonds</span>
+                                        <p class="text-gray-600" data-mock="true">Perfect for beginners</p>
+                                    </div>
+                                    <span class="font-bold text-primary text-xl" data-mock="true">Rp 15,000</span>
+                                </div>
+                            </div>
+                            
+                            <div class="border-2 border-primary bg-primary-light rounded-lg p-4 cursor-pointer" data-event="click:selectPackage">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="font-semibold text-lg" data-mock="true">172 Diamonds</span>
+                                        <p class="text-primary font-medium" data-mock="true">Most Popular!</p>
+                                    </div>
+                                    <span class="font-bold text-primary text-xl" data-mock="true">Rp 28,000</span>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-primary smooth-transition cursor-pointer" data-event="click:selectPackage">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="font-semibold text-lg" data-mock="true">257 Diamonds</span>
+                                        <p class="text-gray-600" data-mock="true">Best value deal</p>
+                                    </div>
+                                    <span class="font-bold text-primary text-xl" data-mock="true">Rp 42,000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="buyNowBtn w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-600 smooth-transition">
+                         BUY NOW
+                        </button>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: ProductDetail -->
+
+    <!-- @COMPONENT: ProductDetail [ PUBG Mobile] -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div>
+                        <!-- PUBG Mobile game artwork with diamond currency and characters -->
+                        <img src="https://images.unsplash.com/photos/person-playing-pubg-mobile-hIXmJH9xhoo=rb-4.0.3&auto=format&fit=crop&w=600&h=400" alt="PUBG Mobile Diamond Top-Up" class="w-full rounded-xl shadow-soft">
+                    </div>
+                    
+                    <div>
+                        <h2 class="font-poppins font-bold text-3xl text-gray-800 mb-4" data-mock="true">PUBG Mobile</h2>
+                        <p class="text-gray-600 mb-6" data-mock="true">Get instant diamonds for PUBG Mobile.</p>
+                        
+                        <!-- Diamond Packages -->
+                        <div class="space-y-3 mb-8">
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-primary smooth-transition cursor-pointer" data-event="click:selectPackage">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="font-semibold text-lg" data-mock="true">86 Diamonds</span>
+                                        <p class="text-gray-600" data-mock="true">Perfect for beginners</p>
+                                    </div>
+                                    <span class="font-bold text-primary text-xl" data-mock="true">Rp 15,000</span>
+                                </div>
+                            </div>
+                            
+                            <div class="border-2 border-primary bg-primary-light rounded-lg p-4 cursor-pointer" data-event="click:selectPackage">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="font-semibold text-lg" data-mock="true">172 Diamonds</span>
+                                        <p class="text-primary font-medium" data-mock="true">Most Popular!</p>
+                                    </div>
+                                    <span class="font-bold text-primary text-xl" data-mock="true">Rp 28,000</span>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-primary smooth-transition cursor-pointer" data-event="click:selectPackage">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="font-semibold text-lg" data-mock="true">257 Diamonds</span>
+                                        <p class="text-gray-600" data-mock="true">Best value deal</p>
+                                    </div>
+                                    <span class="font-bold text-primary text-xl" data-mock="true">Rp 42,000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="buyNowBtn w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-600 smooth-transition">
+                         BUY NOW
+                        </button>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: ProductDetail -->
+
+    <!-- @COMPONENT: ProductDetail [Free Fire] -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div>
+    <!-- Free Fire game artwork with diamond currency and characters -->
+    <img src="https://images.unsplash.com/photo-1582862868159-5f2bc8dbf2f0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+         alt="Free Fire Diamond Top-Up" 
+         class="w-full rounded-xl shadow-soft">
+</div>
+
+                    
+                    <div>
+                        <h2 class="font-poppins font-bold text-3xl text-gray-800 mb-4" data-mock="true">Free Fire</h2>
+                        <p class="text-gray-600 mb-6" data-mock="true">Get instant diamonds for Free Fire.</p>
+                        
+                        <!-- Diamond Packages -->
+                        <div class="space-y-3 mb-8">
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-primary smooth-transition cursor-pointer" data-event="click:selectPackage">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="font-semibold text-lg" data-mock="true">86 Diamonds</span>
+                                        <p class="text-gray-600" data-mock="true">Perfect for beginners</p>
+                                    </div>
+                                    <span class="font-bold text-primary text-xl" data-mock="true">Rp 15,000</span>
+                                </div>
+                            </div>
+                            
+                            <div class="border-2 border-primary bg-primary-light rounded-lg p-4 cursor-pointer" data-event="click:selectPackage">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="font-semibold text-lg" data-mock="true">172 Diamonds</span>
+                                        <p class="text-primary font-medium" data-mock="true">Most Popular!</p>
+                                    </div>
+                                    <span class="font-bold text-primary text-xl" data-mock="true">Rp 28,000</span>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-primary smooth-transition cursor-pointer" data-event="click:selectPackage">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="font-semibold text-lg" data-mock="true">257 Diamonds</span>
+                                        <p class="text-gray-600" data-mock="true">Best value deal</p>
+                                    </div>
+                                    <span class="font-bold text-primary text-xl" data-mock="true">Rp 42,000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="buyNowBtn w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-600 smooth-transition">
+                         BUY NOW
+                        </button>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: ProductDetail -->
+
+    
+
+    <!-- @COMPONENT: CheckoutPage [order confirmation] -->
+    <section class="py-16 bg-white hidden" id="checkout-page">
+        <div class="container mx-auto px-4">
+            <div class="max-w-2xl mx-auto">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-2xl text-green-600"></i>
+                    </div>
+                    <h2 class="font-poppins font-bold text-3xl text-gray-800 mb-2">Order Confirmed!</h2>
+                    <p class="text-gray-600">Your order has been successfully placed</p>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-lg">Order Details</h3>
+                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium" data-mock="true">Processing</span>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Order ID:</span>
+                            <span class="font-mono" data-mock="true">#TZ123456789</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Game:</span>
+                            <span data-mock="true">Mobile Legends</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Package:</span>
+                            <span data-mock="true">172 Diamonds</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">User ID:</span>
+                            <span data-mock="true">123456789</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Payment:</span>
+                            <span data-mock="true">Bank Transfer</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span>Total:</span>
+                            <span data-mock="true">Rp 28,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+                    <h4 class="font-semibold text-blue-800 mb-3">Payment Instructions</h4>
+                    <div class="space-y-2 text-blue-700">
+                        <p class="font-semibold" data-mock="true">Bank Transfer Details:</p>
+                        <p data-mock="true">Bank: Bank Mandiri</p>
+                        <p data-mock="true">Account: 123-456-789-0</p>
+                        <p data-mock="true">Name: TopZoneID</p>
+                        <p data-mock="true">Amount: Rp 28,000</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-600 smooth-transition" data-event="click:trackOrder">
+                        Track Order
+                    </button>
+                    <button class="border border-primary text-primary py-3 rounded-lg font-semibold hover:bg-primary-light smooth-transition" data-event="click:contactSupport">
+                        Contact Support
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: CheckoutPage -->
+
+    <!-- @COMPONENT: OrderStatus [status checker] -->
+    <section class="py-16 bg-gray-light">
+        <div class="container mx-auto px-4">
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-xl shadow-soft p-6 lg:p-8">
+                    <h3 class="font-poppins font-bold text-2xl text-gray-800 mb-2">Check Order Status</h3>
+                    <p class="text-gray-600 mb-6">Enter your order ID to check the current status</p>
+
+                    <div class="flex gap-4 mb-8">
+                        <input data-bind="orderIdCheck" type="text" placeholder="Enter Order ID (e.g., TZ123456789)" class="flex-1 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        <button class="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 smooth-transition" data-event="click:checkOrderStatus">
+                            Check Status
+                        </button>
+                    </div>
+
+                    <!-- Order Status Result -->
+                    <div class="border border-gray-200 rounded-lg p-6 hidden" id="order-status-result">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-semibold text-lg" data-mock="true">Order #TZ123456789</h4>
+                            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium" data-mock="true">Processing</span>
+                        </div>
+
+                        <!-- Status Timeline -->
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-green-500 rounded-full mr-4"></div>
+                                <div>
+                                    <p class="font-medium">Order Placed</p>
+                                    <p class="text-gray-600 text-sm" data-mock="true">Today, 10:30 AM</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-green-500 rounded-full mr-4"></div>
+                                <div>
+                                    <p class="font-medium">Payment Confirmed</p>
+                                    <p class="text-gray-600 text-sm" data-mock="true">Today, 11:15 AM</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-yellow-500 rounded-full mr-4"></div>
+                                <div>
+                                    <p class="font-medium">Processing Order</p>
+                                    <p class="text-gray-600 text-sm" data-mock="true">In progress...</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center opacity-50">
+                                <div class="w-4 h-4 bg-gray-300 rounded-full mr-4"></div>
+                                <div>
+                                    <p class="font-medium">Completed</p>
+                                    <p class="text-gray-600 text-sm">Pending...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                            <p class="text-blue-800 font-medium">Estimated completion: 5-10 minutes</p>
+                            <p class="text-blue-700 text-sm mt-1">We'll send you a notification once your order is complete.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: OrderStatus -->
+
+    <!-- @COMPONENT: Testimonials [customer reviews] -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="font-poppins font-bold text-3xl lg:text-4xl text-gray-800 mb-4">What Our Customers Say</h2>
+                <p class="text-gray-600 text-lg">Trusted by thousands of gamers across Indonesia</p>
+            </div>
+
+            <!-- @MAP: testimonials.map(testimonial => ( -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-soft">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-semibold" data-mock="true">A</div>
+                        <div class="ml-3">
+                            <h4 class="font-semibold" data-mock="true">Ahmad Rahman</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600" data-mock="true">"Super cepat dan mudah! Diamonds langsung masuk dalam hitungan menit. Recommended banget!"</p>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-soft">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-semibold" data-mock="true">S</div>
+                        <div class="ml-3">
+                            <h4 class="font-semibold" data-mock="true">Siti Nurhaliza</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600" data-mock="true">"Pelayanan customer service sangat baik dan responsif. Harga juga kompetitif dibanding tempat lain."</p>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-soft">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-semibold" data-mock="true">B</div>
+                        <div class="ml-3">
+                            <h4 class="font-semibold" data-mock="true">Budi Santoso</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600" data-mock="true">"Udah langganan top-up di sini. Selalu trusted dan gak pernah ada masalah. Top!"</p>
+                </div>
+            </div>
+            <!-- @END_MAP )) -->
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-12 pt-12 border-t border-gray-200">
+                <div class="text-center">
+                    <div class="font-poppins font-bold text-3xl lg:text-4xl text-primary mb-2" data-mock="true">50K+</div>
+                    <p class="text-gray-600" data-mock="true">Happy Customers</p>
+                </div>
+                <div class="text-center">
+                    <div class="font-poppins font-bold text-3xl lg:text-4xl text-primary mb-2" data-mock="true">99.9%</div>
+                    <p class="text-gray-600" data-mock="true">Success Rate</p>
+                </div>
+                <div class="text-center">
+                    <div class="font-poppins font-bold text-3xl lg:text-4xl text-primary mb-2" data-mock="true">24/7</div>
+                    <p class="text-gray-600" data-mock="true">Support</p>
+                </div>
+                <div class="text-center">
+                    <div class="font-poppins font-bold text-3xl lg:text-4xl text-primary mb-2" data-mock="true">< 5 min</div>
+                    <p class="text-gray-600" data-mock="true">Delivery Time</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Testimonials -->
+
+    <!-- @COMPONENT: FAQ [frequently asked questions] -->
+    <section id="faq" class="py-16 bg-gray-light">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="font-poppins font-bold text-3xl lg:text-4xl text-gray-800 mb-4">Frequently Asked Questions</h2>
+                <p class="text-gray-600 text-lg">Find answers to common questions about our service</p>
+            </div>
+
+            <div class="max-w-3xl mx-auto space-y-4">
+                <!-- @MAP: faqs.map(faq => ( -->
+                <div class="bg-white rounded-xl shadow-soft">
+                    <button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50 smooth-transition" data-event="click:toggleFaq">
+                        <span class="font-semibold text-gray-800" data-mock="true">How long does delivery take?</span>
+                        <i class="fas fa-chevron-down text-gray-500"></i>
+                    </button>
+                    <div class="px-6 pb-6 hidden" data-mock="true">
+                        <p class="text-gray-600">Most orders are processed within 1-5 minutes. During peak hours, it may take up to 15 minutes. You'll receive instant notification once your order is complete.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-soft">
+                    <button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50 smooth-transition" data-event="click:toggleFaq">
+                        <span class="font-semibold text-gray-800" data-mock="true">Is my payment information secure?</span>
+                        <i class="fas fa-chevron-down text-gray-500"></i>
+                    </button>
+                    <div class="px-6 pb-6 hidden" data-mock="true">
+                        <p class="text-gray-600">Yes, we use industry-standard encryption and work with trusted payment providers to ensure your information is completely secure.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-soft">
+                    <button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50 smooth-transition" data-event="click:toggleFaq">
+                        <span class="font-semibold text-gray-800" data-mock="true">What if I enter wrong User ID?</span>
+                        <i class="fas fa-chevron-down text-gray-500"></i>
+                    </button>
+                    <div class="px-6 pb-6 hidden" data-mock="true">
+                        <p class="text-gray-600">Please double-check your User ID before submitting. If you've made an error, contact our support team immediately with your order ID and we'll help resolve the issue.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-soft">
+                    <button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50 smooth-transition" data-event="click:toggleFaq">
+                        <span class="font-semibold text-gray-800" data-mock="true">Do you offer refunds?</span>
+                        <i class="fas fa-chevron-down text-gray-500"></i>
+                    </button>
+                    <div class="px-6 pb-6 hidden" data-mock="true">
+                        <p class="text-gray-600">Refunds are available within 24 hours if the order hasn't been processed yet. Once credits are delivered to your game account, refunds are not possible due to the nature of digital goods.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-soft">
+                    <button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50 smooth-transition" data-event="click:toggleFaq">
+                        <span class="font-semibold text-gray-800" data-mock="true">What payment methods do you accept?</span>
+                        <i class="fas fa-chevron-down text-gray-500"></i>
+                    </button>
+                    <div class="px-6 pb-6 hidden" data-mock="true">
+                        <p class="text-gray-600">We accept QRIS, DANA, OVO, Bank Transfer, and major credit cards. All payments are processed securely through our trusted payment partners.</p>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: FAQ -->
+
+    <!-- @COMPONENT: AboutUs [company information] -->
+    <section id="about" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="font-poppins font-bold text-3xl lg:text-4xl text-gray-800 mb-6">About TopZoneID</h2>
+                <p class="text-lg text-gray-600 mb-8" data-mock="true">
+                    TopZoneID is Indonesia's leading game top-up platform, serving over 50,000 happy gamers since 2020. 
+                    We're committed to providing fast, secure, and affordable gaming credit top-ups for all your favorite games.
+                </p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-primary-light rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-bolt text-2xl text-primary"></i>
+                        </div>
+                        <h3 class="font-poppins font-semibold text-xl mb-2">Lightning Fast</h3>
+                        <p class="text-gray-600" data-mock="true">Average delivery time under 5 minutes</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-primary-light rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-shield-alt text-2xl text-primary"></i>
+                        </div>
+                        <h3 class="font-poppins font-semibold text-xl mb-2">100% Secure</h3>
+                        <p class="text-gray-600" data-mock="true">Bank-level security for all transactions</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-primary-light rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-headset text-2xl text-primary"></i>
+                        </div>
+                        <h3 class="font-poppins font-semibold text-xl mb-2">24/7 Support</h3>
+                        <p class="text-gray-600" data-mock="true">Always here to help when you need us</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-light rounded-xl p-8">
+                    <h3 class="font-poppins font-semibold text-2xl mb-4">Our Mission</h3>
+                    <p class="text-gray-600 text-lg" data-mock="true">
+                        To make gaming more accessible and enjoyable for everyone by providing the most reliable, 
+                        fastest, and most affordable top-up service in Indonesia.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: AboutUs -->
+
+    <!-- @COMPONENT: Footer [links, social media, contact] -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                <!-- Company Info -->
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-gamepad text-white"></i>
+                        </div>
+                        <span class="font-poppins font-bold text-xl">TopZoneID</span>
+                    </div>
+                    <p class="text-gray-300 mb-4" data-mock="true">
+                        Indonesia's most trusted gaming top-up platform. Fast, secure, and reliable.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-primary smooth-transition">
+                            <i class="fab fa-facebook-f text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-primary smooth-transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-primary smooth-transition">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-primary smooth-transition">
+                            <i class="fab fa-youtube text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="font-poppins font-semibold text-lg mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-primary smooth-transition">Home</a></li>
+                        <li><a href="#games" class="text-gray-300 hover:text-primary smooth-transition">Games</a></li>
+                        <li><a href="#about" class="text-gray-300 hover:text-primary smooth-transition">About Us</a></li>
+                        <li><a href="#faq" class="text-gray-300 hover:text-primary smooth-transition">FAQ</a></li>
+                        <li><a href="contact" class="text-gray-300 hover:text-primary smooth-transition">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Games -->
+                <div>
+                    <h4 class="font-poppins font-semibold text-lg mb-4">Popular Games</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-primary smooth-transition" data-mock="true">Mobile Legends</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-primary smooth-transition" data-mock="true">Free Fire</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-primary smooth-transition" data-mock="true">PUBG Mobile</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-primary smooth-transition" data-mock="true">Genshin Impact</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-primary smooth-transition" data-mock="true">View All Games</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+            <section id="contact">
+                <div> 
+                    <h4 class="font-poppins font-semibold text-lg mb-4">Contact Us</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-primary mr-3"></i>
+                            <span class="text-gray-300" data-mock="true">support@topzoneid.com</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fab fa-whatsapp text-primary mr-3"></i>
+                            <span class="text-gray-300" data-mock="true">+62 812-3456-7890</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-clock text-primary mr-3"></i>
+                            <span class="text-gray-300">24/7 Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+            <!-- Bottom Footer -->
+            <div class="border-t border-gray-700 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-300 mb-4 md:mb-0" data-mock="true">
+                        © 2024 TopZoneID. All rights reserved.
+                    </p>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-300 hover:text-primary smooth-transition text-sm">Terms of Service</a>
+                        <a href="#" class="text-gray-300 hover:text-primary smooth-transition text-sm">Privacy Policy</a>
+                        <a href="#" class="text-gray-300 hover:text-primary smooth-transition text-sm">Refund Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/6281234567890" target="_blank" class="floating-whatsapp bg-green-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 smooth-transition" data-implementation="Should open WhatsApp chat">
+        <i class="fab fa-whatsapp text-2xl"></i>
+    </a>
+
+    <script>
+        // TODO: Implement business logic, API calls, or state management
+        (function() {
+            // Mobile menu toggle
+            const mobileMenuButton = document.querySelector('[data-event="click:toggleMobileMenu"]');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const closeMobileMenuButton = document.querySelector('[data-event="click:closeMobileMenu"]');
+
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.add('active');
+                });
+            }
+
+            if (closeMobileMenuButton && mobileMenu) {
+                closeMobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.remove('active');
+                });
+            }
+
+            // FAQ toggle functionality
+            const faqButtons = document.querySelectorAll('[data-event="click:toggleFaq"]');
+            faqButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const content = this.parentElement.querySelector('div');
+                    const icon = this.querySelector('i');
+                    
+                    content.classList.toggle('hidden');
+                    icon.classList.toggle('fa-chevron-down');
+                    icon.classList.toggle('fa-chevron-up');
+                });
+            });
+
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        // Close mobile menu if open
+                        if (mobileMenu) {
+                            mobileMenu.classList.remove('active');
+                        }
+                    }
+                });
+            });
+
+            // Order status checker
+            const checkStatusButton = document.querySelector('[data-event="click:checkOrderStatus"]');
+            const orderStatusResult = document.getElementById('order-status-result');
+
+            if (checkStatusButton && orderStatusResult) {
+                checkStatusButton.addEventListener('click', function() {
+                    // Mock status check - in real implementation, this would make an API call
+                    setTimeout(() => {
+                        orderStatusResult.classList.remove('hidden');
+                        orderStatusResult.scrollIntoView({ behavior: 'smooth' });
+                    }, 1000);
+                });
+            }
+
+            // Form submission handling (mock)
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // Mock form processing
+                    console.log('Form submitted - would process in real implementation');
+                });
+            });
+
+            // Package selection
+            const packageSelectors = document.querySelectorAll('[data-event="click:selectPackage"], [data-event="click:selectOrderPackage"]');
+            packageSelectors.forEach(selector => {
+                selector.addEventListener('click', function() {
+                    // Remove previous selections
+                    packageSelectors.forEach(s => {
+                        s.classList.remove('border-primary', 'bg-primary-light');
+                        s.classList.add('border-gray-200');
+                    });
+                    
+                    // Add selection to clicked element
+                    this.classList.remove('border-gray-200');
+                    this.classList.add('border-primary', 'bg-primary-light');
+                });
+            });
+
+            // Payment method selection
+            const paymentSelectors = document.querySelectorAll('[data-event="click:selectPayment"]');
+            paymentSelectors.forEach(selector => {
+                selector.addEventListener('click', function() {
+                    // Remove previous selections
+                    paymentSelectors.forEach(s => {
+                        s.classList.remove('border-primary', 'bg-primary-light');
+                        s.classList.add('border-gray-200');
+                    });
+                    
+                    // Add selection to clicked element
+                    this.classList.remove('border-gray-200');
+                    this.classList.add('border-primary', 'bg-primary-light');
+                });
+            });
+        })();
+    </script>
+   <script>
+document.addEventListener("DOMContentLoaded", function(){
+    // Ambil semua tombol BUY NOW
+    document.querySelectorAll(".buyNowBtn").forEach(function(btn){
+        btn.addEventListener("click", function(){
+            // Cari elemen parent terdekat dari tombol ini (section product detail)
+            const section = btn.closest("[data-game]") || btn.closest("section");
+
+            // Ambil nama game dari atribut data atau judul di section
+            const game = section?.getAttribute("data-game") || 
+                         section?.querySelector("h2")?.innerText.trim() || "Game Tidak Diketahui";
+
+            // Ambil paket yang dipilih di section ini
+            const packageEl = section?.querySelector(".border-2.border-primary") || section?.querySelector(".border-primary");
+            const amount = packageEl ? packageEl.innerText.trim().replace(/\s+/g, " ") : "";
+
+            if(!amount){
+                alert("Silakan pilih paket terlebih dahulu untuk " + game);
+                return;
+            }
+
+            const params = new URLSearchParams({
+                game: game,
+                userId: "",
+                serverId: "",
+                amount: amount
+            });
+
+            window.location.href = "order.html?" + params.toString();
+        });
+    });
+});
+</script>
+
+<script>
+const BACKEND_URL = 'https://YOUR-BACKEND.onrender.com'; // ganti dengan URL Render kamu
+
+document.addEventListener('click', async (e) => {
+  if (!e.target.closest('[data-event="click:proceedToPayment"]')) return;
+
+  // Ambil data dari form yang SUDAH ADA (tanpa ubah UI)
+  const game = document.querySelector('[data-bind="orderGame"]')?.value?.trim() || 'Unknown';
+  const userId = document.querySelector('[data-bind="orderUserId"]')?.value?.trim() || '';
+  const serverId = document.querySelector('[data-bind="orderServerId"]')?.value?.trim() || '';
+
+  const selectedPkg = document.getElementById('selectedPackageInput')?.value ||
+    (document.querySelector('[data-event="click:selectOrderPackage"].border-primary .font-semibold')?.innerText || '').trim();
+
+  const selectedPay = document.getElementById('selectedPaymentInput')?.value ||
+    (document.querySelector('[data-event="click:selectPayment"].border-primary p')?.innerText || '').trim();
+
+  const name = 'Customer ' + (userId || '');
+  const amount = (() => {
+    const priceText = document.querySelector('[data-event="click:selectOrderPackage"].border-primary .text-primary')?.innerText || '';
+    const digits = priceText.replace(/[^0-9]/g, '');
+    return parseInt(digits || '0', 10);
+  })();
+
+  if (!amount || !selectedPay) {
+    alert('Pilih package & metode pembayaran dulu ya.');
+    return;
+  }
+
+  const order_items = [{
+    sku: (game.includes('Mobile Legends') ? 'ML' : 'PKG') + '-' + (selectedPkg||'').replace(/\D/g,''),
+    name: (selectedPkg||'') + ' - ' + game,
+    price: amount,
+    quantity: 1,
+    product_url: window.location.href
+  }];
+
+  try {
+    const resp = await fetch(BACKEND_URL + '/api/create-transaction', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        method: selectedPay.toUpperCase(),
+        amount,
+        customer_name: name,
+        customer_email: 'sandbox@example.com',
+        customer_phone: document.querySelector('[data-bind="whatsappNumber"]')?.value || '',
+        order_items,
+        return_url: window.location.origin + '/order-complete.html',
+        callback_url: BACKEND_URL + '/api/tripay-callback'
+      })
+    });
+    const data = await resp.json();
+    if (data?.success === true && data?.data?.payment_url) {
+      window.location.href = data.data.payment_url;
+    } else if (data?.data?.payment_url) {
+      window.location.href = data.data.payment_url;
+    } else {
+      console.error(data);
+      alert('Gagal membuat transaksi. Cek console.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Jaringan bermasalah.');
+  }
+});
+</script>
+
+
+
+</body>
+</html>
