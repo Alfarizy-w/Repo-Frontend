@@ -1,16 +1,20 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
+  base: './',                // penting untuk Netlify/hosting static
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"),
+      '@': resolve(__dirname, 'src'), // aman kalau kamu pakai import '@/...'
     },
   },
   build: {
-    outDir: "dist",
+    outDir: 'dist',
     emptyOutDir: true,
   },
 });
