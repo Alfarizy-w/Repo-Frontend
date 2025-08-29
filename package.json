@@ -32,5 +32,18 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.12",
     "vite": "^5.4.19"
-  }
+  },
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alfarizy-w/Repo-Frontend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Alfarizy-w/Repo-Frontend/issues"
+  },
+  "homepage": "https://github.com/Alfarizy-w/Repo-Frontend#readme"
 }
