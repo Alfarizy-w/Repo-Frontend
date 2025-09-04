@@ -1098,33 +1098,45 @@ document.addEventListener('click', async (e) => {
   }];
 
   try {
-    const resp = await fetch(BACKEND_URL + '/api/create-transaction', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        method: selectedPay.toUpperCase(),
-        amount,
-        customer_name: name,
-        customer_email: 'sandbox@example.com',
-        customer_phone: document.querySelector('[data-bind="whatsappNumber"]')?.value || '',
-        order_items,
-        return_url: window.location.origin + '/order-complete.html',
-        callback_url: BACKEND_URL + '/api/tripay-callback'
-      })
-    });
-    const data = await resp.json();
-    if (data?.success === true && data?.data?.payment_url) {
-      window.location.href = data.data.payment_url;
-    } else if (data?.data?.payment_url) {
-      window.location.href = data.data.payment_url;
-    } else {
-      console.error(data);
-      alert('Gagal membuat transaksi. Cek console.');
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Jaringan bermasalah.');
+  const resp = await fetch(BACKEND_URL + '/api/create-transaction', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      method: selectedPay.toUpperCase(),
+      amount,
+      customer_name: name,
+      customer_email: 'sandbox@example.com',
+      customer_phone: document.querySelector('[data-bind="whatsappNumber"]')?.value || '',
+      order_items,
+      return_url: window.location.origin + '/order-complete.html',
+      callback_url: BACKEND_URL + '/api/tripay-callback'
+    })
+  });
+
+  console.log("📡 Request dikirim ke:", BACKEND_URL + '/api/create-transaction'); // <--
+  console.log("📤 Payload:", {
+    method: selectedPay.toUpperCase(),
+    amount,
+    customer_name: name,
+    customer_email: 'sandbox@example.com',
+    customer_phone: document.querySelector('[data-bind="whatsappNumber"]')?.value || '',
+    order_items,
+    return_url: window.location.origin + '/order-complete.html',
+    callback_url: BACKEND_URL + '/api/tripay-callback'
+  });
+
+  const data = await resp.json();
+  console.log("✅ Response dari backend:", data); // <--
+
+  if (data?.success === true && data?.data?.payment_url) {
+    window.location.href = data.data.payment_url;
+  } else if (data?.data?.payment_url) {
+    window.location.href = data.data.payment_url;
   }
+} catch (err) {
+  console.error("❌ Error fetch create-transaction:", err); // <--
+}
+
 });
 </script>
 
